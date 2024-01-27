@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const SnippetsComponent = ({ snippets }) => {
+const SnippetsComponent = ({ snippets, updateSnippet, deleteSnippet }) => {
   const [editId, setEditId] = useState(null);
   const [editedSnippet, setEditedSnippet] = useState({ title: "", data: "" });
 
@@ -13,6 +13,11 @@ const SnippetsComponent = ({ snippets }) => {
 
   const handleChange = (e) => {
     setEditedSnippet({ ...editedSnippet, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async () => {
+    await updateSnippet(editId, editedSnippet);
+    setEditId(null); // Exit edit mode
   };
 
   const truncateText = (text, wordLimit = 100) => {
@@ -43,7 +48,8 @@ const SnippetsComponent = ({ snippets }) => {
                 value={editedSnippet.data}
                 onChange={handleChange}
               />
-              {/* <button onClick={handleSave}>Save</button> */}
+              <button onClick={handleSave}>Update</button>
+              <button onClick={() => deleteSnippet(snippet.id)}>Delete</button>
             </div>
           ) : (
             <>

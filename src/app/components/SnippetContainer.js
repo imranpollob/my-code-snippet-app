@@ -4,7 +4,14 @@ import React, { useState, useEffect } from "react";
 import SnippetForm from "./SnippetForm";
 import SnippetsComponent from "./SnippetsComponent";
 import { db } from "../../../firebase";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 const SnippetContainer = () => {
   const [snippets, setSnippets] = useState([]);
@@ -35,11 +42,33 @@ const SnippetContainer = () => {
     setIsLoading(true);
     try {
       await addDoc(collection(db, "snippets"), newSnippet);
-      await fetchSnippets(); // Refresh the snippets list
+      await fetchSnippets();
     } catch (error) {
       console.error("Error adding new snippet:", error);
     }
     setIsLoading(false);
+  };
+
+  const updateSnippet = async (snippetId, updatedData) => {
+    const snippetRef = doc(db, "snippets", snippetId);
+    try {
+      await updateDoc(snippetRef, updatedData);
+      console.log("Snippet successfully updated!");
+      await fetchSnippets();
+    } catch (error) {
+      console.error("Error updating snippet:", error);
+    }
+  };
+
+  const deleteSnippet = async (snippetId) => {
+    const snippetRef = doc(db, "snippets", snippetId);
+    try {
+      await deleteDoc(snippetRef);
+      console.log("Snippet successfully deleted!");
+      await fetchSnippets();
+    } catch (error) {
+      console.error("Error deleting snippet:", error);
+    }
   };
 
   return (
@@ -48,7 +77,11 @@ const SnippetContainer = () => {
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <SnippetsComponent snippets={snippets} />
+        <SnippetsComponent
+          snippets={snippets}
+          updateSnippet={updateSnippet}
+          deleteSnippet={deleteSnippet}
+        />
       )}
     </div>
   );
