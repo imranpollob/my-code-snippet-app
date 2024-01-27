@@ -1,5 +1,5 @@
 import GoogleAuthButton from "./components/GoogleAuthButton";
-import SnippetsComponent from "./components/SnippetsComponent";
+import SnippetContainer from "./components/SnippetContainer";
 import "./page.css";
 
 export default function Home() {
@@ -7,8 +7,7 @@ export default function Home() {
     <main>
       <GoogleAuthButton />
       <div>
-        <p>Hi...</p>
-        <SnippetsComponent />
+        <SnippetContainer />
       </div>
     </main>
   );

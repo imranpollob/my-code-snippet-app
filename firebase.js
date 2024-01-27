@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, collection, getDocs } from "firebase/firestore"; // If you're using Firestore
+import { getFirestore } from "firebase/firestore"; // If you're using Firestore
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -21,16 +21,5 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Get a list of snippets from your database
-const fetchSnippets = async () => {
-  const snippetsCol = collection(db, "snippets");
-  const snippetSnapshot = await getDocs(snippetsCol);
-  const snippetList = snippetSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-  return snippetList;
-};
-
 // Export the necessary functionalities
-export { auth, db, signInWithPopup, GoogleAuthProvider, fetchSnippets };
+export { auth, db, signInWithPopup, GoogleAuthProvider };

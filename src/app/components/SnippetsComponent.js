@@ -1,21 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchSnippets } from "../../../firebase";
 
-const SnippetsComponent = () => {
-  const [snippets, setSnippets] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchSnippets().then((data) => {
-      setSnippets(data);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-
+const SnippetsComponent = ({ snippets }) => {
   return (
     <div className="cards-container">
       {snippets.map((snippet) => (
