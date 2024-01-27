@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import firebase from "../../../firebase";
+import { auth, signInWithPopup, GoogleAuthProvider } from "../../../firebase";
 
 const GoogleAuthButton = () => {
   const [user, setUser] = useState(null);
 
   const signInWithGoogle = async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
     try {
-      const result = await firebase.auth().signInWithPopup(provider);
+      const result = await signInWithPopup(auth, provider);
       setUser(result.user);
     } catch (error) {
       console.error("Error during Google Sign In", error);
@@ -17,7 +17,7 @@ const GoogleAuthButton = () => {
   };
 
   useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
     });
     return () => unsubscribe();
