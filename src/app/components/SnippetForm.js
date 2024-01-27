@@ -1,16 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 const SnippetForm = ({ addSnippet }) => {
   const [title, setTitle] = useState("");
   const [data, setData] = useState("");
+  const textareaRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await addSnippet({ title, data });
     setTitle("");
     setData("");
+    adjustHeight(true);
+  };
+
+  const adjustHeight = (reset = false) => {
+    if (reset) {
+      textareaRef.current.style.height = null;
+    } else {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
   };
 
   return (
@@ -18,15 +29,17 @@ const SnippetForm = ({ addSnippet }) => {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Title Enter your code here..."
-          value={title}
+          placeholder="Title"
           onChange={(e) => setTitle(e.target.value)}
         />
         <textarea
-          placeholder="Enter your code here..."
+          ref={textareaRef}
+          rows={2}
+          placeholder="Enter your snippet"
           value={data}
           onChange={(e) => setData(e.target.value)}
           autoFocus
+          onInput={() => adjustHeight()}
         />
         <button type="submit">Submit</button>
       </form>

@@ -27,12 +27,11 @@ const GoogleAuthButton = () => {
     <div
       style={{
         position: "absolute",
-        top: "10px",
-        right: "10px",
-        margin: "10px",
+        top: "30px",
+        right: "30px",
       }}
     >
-      <button onClick={signInWithGoogle} style={{ borderRadius: "50%" }}>
+      <button onClick={signInWithGoogle} className="login-button">
         {user ? (
           <img
             src={user.photoURL}

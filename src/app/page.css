@@ -1,28 +1,36 @@
+.login-button {
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+}
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start; /* Aligns items to the start of the container */
-  gap: 10px; /* Space between cards */
+  justify-content: flex-start;
+  gap: 10px;
 }
 
 .card {
   flex: 1;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 16px;
-  margin: 16px;
-  max-width: 300px;
+  padding: 15px;
+  min-width: 250px;
+  max-width: 250px;
 }
 
 .card > h3 {
   margin-top: 0;
+  font-size: 14px;
+}
+
+.card > p {
+  font-size: 12px;
 }
 
 .create-snippet-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 20px;
   margin: 20px auto;
   border: 1px solid #ddd;
@@ -39,6 +47,13 @@ textarea {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 12px;
+}
+
+.create-snippet-card > form > textarea {
+  font-size: 12px;
+  resize: none;
+  overflow: hidden;
 }
 
 .create-snippet-card > form > button {
@@ -48,6 +63,8 @@ textarea {
   background-color: #fff;
   cursor: pointer;
   width: 100%;
+  font-size: 12px;
+  font-weight: bold;
 }
 
 .create-snippet-card > form > button:hover {
