@@ -21,18 +21,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// // Get a list of snippets from your database
-// async function getSnippets(db) {
-//   const snippetsCol = collection(db, "snippets");
-//   const snippetSnapshot = await getDocs(snippetsCol);
-//   const snippetList = snippetSnapshot.docs.map((doc) => doc.data());
-//   return snippetList;
-// }
-
-// getSnippets(db).then((snippetList) => {
-//   // snippetList is an array of "snippet" objects
-//   console.log(snippetList);
-// });
+// Get a list of snippets from your database
+const fetchSnippets = async () => {
+  const snippetsCol = collection(db, "snippets");
+  const snippetSnapshot = await getDocs(snippetsCol);
+  const snippetList = snippetSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  return snippetList;
+};
 
 // Export the necessary functionalities
-export { auth, db, signInWithPopup, GoogleAuthProvider };
+export { auth, db, signInWithPopup, GoogleAuthProvider, fetchSnippets };

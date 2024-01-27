@@ -1,15 +1,14 @@
 import GoogleAuthButton from "./components/GoogleAuthButton";
-import styles from "./page.module.css";
+import SnippetsComponent from "./components/SnippetsComponent";
+import "./page.css";
 
 export default function Home() {
   return (
-    <main className={styles.main}>
+    <main>
       <GoogleAuthButton />
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
+      <div>
+        <p>Hi...</p>
+        <SnippetsComponent />
       </div>
     </main>
   );

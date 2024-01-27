@@ -1,0 +1,15 @@
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* Aligns items to the start of the container */
+  gap: 10px; /* Space between cards */
+}
+
+.card {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px;
+  max-width: 300px;
+}
