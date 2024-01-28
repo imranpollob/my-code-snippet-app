@@ -7,6 +7,17 @@
   margin: 0;
 }
 
+.search-input {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 10px;
+}
+
+.highlight {
+  background-color: yellow; /* Choose a highlighting color */
+}
+
 /* Cards */
 
 .cards-container {

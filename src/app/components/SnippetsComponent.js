@@ -2,13 +2,30 @@
 
 import React, { useState } from "react";
 
-const SnippetsComponent = ({ snippets, onCardClick }) => {
-  const truncateText = (text, wordLimit = 100) => {
+const SnippetsComponent = ({ snippets, onCardClick, searchQuery }) => {
+  const truncateText = (text, wordLimit) => {
     const words = text.split(/\s+/);
     if (words.length > wordLimit) {
       return words.slice(0, wordLimit).join(" ") + "...";
     }
     return text;
+  };
+
+  const highlightMatch = (text, query) => {
+    if (!query) return text;
+
+    const regex = new RegExp(`(${query})`, "gi");
+    const parts = text.split(regex);
+
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} className="highlight">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
   };
 
   return (
@@ -19,8 +36,8 @@ const SnippetsComponent = ({ snippets, onCardClick }) => {
           className="card"
           onClick={() => onCardClick(snippet)}
         >
-          <h3>{snippet.title}</h3>
-          <p>{truncateText(snippet.data, 100)}</p>
+          <h3>{highlightMatch(snippet.title, searchQuery)}</h3>
+          <p>{highlightMatch(truncateText(snippet.data, 50), searchQuery)}</p>
         </div>
       ))}
     </div>

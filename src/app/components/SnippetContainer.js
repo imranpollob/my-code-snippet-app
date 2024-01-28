@@ -21,6 +21,7 @@ const SnippetContainer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSnippet, setCurrentSnippet] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchSnippets();
@@ -90,38 +91,43 @@ const SnippetContainer = () => {
     }
   };
 
-  async function searchInTitleAndData(db, searchTerm) {
-    setIsLoading(true);
-    const colRef = collection(db, "snippets");
+  const handleSearch = (e) => {
+    if (e.key === "Enter") {
+      // No additional action needed here if you're filtering
+      // snippets directly in the render method.
+    }
+  };
 
-    // Query for the 'title' field
-    const titleQuery = query(colRef, where("title", "==", searchTerm));
-    const titleQuerySnapshot = await getDocs(titleQuery);
-
-    // Query for the 'data' field
-    const dataQuery = query(colRef, where("data", "==", searchTerm));
-    const dataQuerySnapshot = await getDocs(dataQuery);
-
-    // Combine and deduplicate results
-    const combinedResults = new Map();
-    titleQuerySnapshot.forEach((doc) => {
-      combinedResults.set(doc.id, doc.data());
-    });
-    dataQuerySnapshot.forEach((doc) => {
-      combinedResults.set(doc.id, doc.data()); // This will overwrite if the id is already present, effectively deduplicating
-    });
-    setSnippets(Array.from(combinedResults.values()));
-    setIsLoading(false);
-  }
+  const filteredSnippets = searchQuery
+    ? snippets.filter((snippet) => {
+        const query = searchQuery.toLowerCase();
+        return (
+          snippet.title.toLowerCase().includes(query) ||
+          snippet.data.toLowerCase().includes(query)
+        );
+      })
+    : snippets;
 
   return (
     <div>
+      <input
+        className="search-input"
+        type="text"
+        placeholder="Search snippets..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyDown={handleSearch}
+      />
       <SnippetForm addSnippet={addSnippet} />
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <React.Fragment>
-          <SnippetsComponent snippets={snippets} onCardClick={openModal} />
+          <SnippetsComponent
+            snippets={filteredSnippets}
+            onCardClick={openModal}
+            searchQuery={searchQuery}
+          />
           <Modal show={isModalOpen} onClose={closeModal}>
             {currentSnippet && (
               <div className="big-display-card">
