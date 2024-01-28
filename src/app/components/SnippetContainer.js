@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import SnippetForm from "./SnippetForm";
 import SnippetsComponent from "./SnippetsComponent";
+import Modal from "./Modal";
 import { db } from "../../../firebase";
 import {
   collection,
@@ -11,15 +12,28 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
 const SnippetContainer = () => {
   const [snippets, setSnippets] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentSnippet, setCurrentSnippet] = useState(null);
 
   useEffect(() => {
     fetchSnippets();
   }, []);
+
+  const openModal = (snippet) => {
+    setCurrentSnippet(snippet);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const fetchSnippets = async () => {
     setIsLoading(true);
@@ -41,8 +55,9 @@ const SnippetContainer = () => {
     if (!newSnippet.title && !newSnippet.data) return;
     setIsLoading(true);
     try {
-      await addDoc(collection(db, "snippets"), newSnippet);
-      await fetchSnippets();
+      const docRef = await addDoc(collection(db, "snippets"), newSnippet);
+      const newSnippetWithId = { id: docRef.id, ...newSnippet };
+      setSnippets([...snippets, newSnippetWithId]);
     } catch (error) {
       console.error("Error adding new snippet:", error);
     }
@@ -53,8 +68,12 @@ const SnippetContainer = () => {
     const snippetRef = doc(db, "snippets", snippetId);
     try {
       await updateDoc(snippetRef, updatedData);
-      console.log("Snippet successfully updated!");
-      await fetchSnippets();
+      setSnippets(
+        snippets.map((snippet) =>
+          snippet.id === snippetId ? { ...snippet, ...updatedData } : snippet
+        )
+      );
+      closeModal();
     } catch (error) {
       console.error("Error updating snippet:", error);
     }
@@ -64,12 +83,36 @@ const SnippetContainer = () => {
     const snippetRef = doc(db, "snippets", snippetId);
     try {
       await deleteDoc(snippetRef);
-      console.log("Snippet successfully deleted!");
-      await fetchSnippets();
+      setSnippets(snippets.filter((snippet) => snippet.id !== snippetId));
+      closeModal();
     } catch (error) {
       console.error("Error deleting snippet:", error);
     }
   };
+
+  async function searchInTitleAndData(db, searchTerm) {
+    setIsLoading(true);
+    const colRef = collection(db, "snippets");
+
+    // Query for the 'title' field
+    const titleQuery = query(colRef, where("title", "==", searchTerm));
+    const titleQuerySnapshot = await getDocs(titleQuery);
+
+    // Query for the 'data' field
+    const dataQuery = query(colRef, where("data", "==", searchTerm));
+    const dataQuerySnapshot = await getDocs(dataQuery);
+
+    // Combine and deduplicate results
+    const combinedResults = new Map();
+    titleQuerySnapshot.forEach((doc) => {
+      combinedResults.set(doc.id, doc.data());
+    });
+    dataQuerySnapshot.forEach((doc) => {
+      combinedResults.set(doc.id, doc.data()); // This will overwrite if the id is already present, effectively deduplicating
+    });
+    setSnippets(Array.from(combinedResults.values()));
+    setIsLoading(false);
+  }
 
   return (
     <div>
@@ -77,11 +120,59 @@ const SnippetContainer = () => {
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <SnippetsComponent
-          snippets={snippets}
-          updateSnippet={updateSnippet}
-          deleteSnippet={deleteSnippet}
-        />
+        <React.Fragment>
+          <SnippetsComponent snippets={snippets} onCardClick={openModal} />
+          <Modal show={isModalOpen} onClose={closeModal}>
+            {currentSnippet && (
+              <div className="big-display-card">
+                <input
+                  className="big-display-card-title"
+                  type="text"
+                  value={currentSnippet.title}
+                  onChange={(e) =>
+                    setCurrentSnippet({
+                      ...currentSnippet,
+                      title: e.target.value,
+                    })
+                  }
+                />
+                <textarea
+                  className="big-display-card-textarea"
+                  value={currentSnippet.data}
+                  onChange={(e) =>
+                    setCurrentSnippet({
+                      ...currentSnippet,
+                      data: e.target.value,
+                    })
+                  }
+                />
+                <div className="big-display-card-buttons">
+                  <div className="big-display-card-buttons-left">
+                    <button className="close-button" onClick={closeModal}>
+                      Close
+                    </button>
+                  </div>
+                  <div className="big-display-card-buttons-right">
+                    <button
+                      className="update-button"
+                      onClick={() =>
+                        updateSnippet(currentSnippet.id, currentSnippet)
+                      }
+                    >
+                      Update
+                    </button>
+                    <button
+                      className="delete-button"
+                      onClick={() => deleteSnippet(currentSnippet.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Modal>
+        </React.Fragment>
       )}
     </div>
   );
