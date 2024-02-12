@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { auth, signInWithPopup, GoogleAuthProvider } from "../../../firebase";
+import {
+  auth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+} from "../../../firebase";
 
 const GoogleAuthButton = () => {
   const [user, setUser] = useState(null);
@@ -16,6 +21,15 @@ const GoogleAuthButton = () => {
     }
   };
 
+  const signOutFromGoogle = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Error during Google Sign Out", error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
@@ -24,27 +38,25 @@ const GoogleAuthButton = () => {
   }, []);
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: "30px",
-        right: "30px",
-      }}
-    >
-      <button onClick={signInWithGoogle} className="login-button">
-        {user ? (
-          <img
-            src={user.photoURL}
-            alt="Profile"
-            style={{ width: "40px", height: "40px", borderRadius: "50%" }}
-          />
-        ) : (
-          <img
-            src="/robot-avatar.jpg"
-            alt="Guest"
-            style={{ width: "40px", height: "40px", borderRadius: "50%" }}
-          />
-        )}
+    <div className="auth-container">
+      {user ? (
+        <img
+          src={user.photoURL}
+          alt="Profile"
+          style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+        />
+      ) : (
+        <img
+          src="/robot-avatar.jpg"
+          alt="Guest"
+          style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+        />
+      )}
+      <button
+        className="hover-button"
+        onClick={user ? signOutFromGoogle : signInWithGoogle}
+      >
+        {user ? "Logout" : "Login"}
       </button>
     </div>
   );

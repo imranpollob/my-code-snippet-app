@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import GoogleAuthButton from "./GoogleAuthButton";
 import SnippetForm from "./SnippetForm";
 import SnippetsComponent from "./SnippetsComponent";
 import Modal from "./Modal";
@@ -110,14 +111,20 @@ const SnippetContainer = () => {
 
   return (
     <div>
-      <input
-        className="search-input"
-        type="text"
-        placeholder="Search snippets..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onKeyDown={handleSearch}
-      />
+      <div className="top-bar">
+        <div>
+          <input
+            className="search-input"
+            type="text"
+            placeholder="Search snippets..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+          />
+        </div>
+        <GoogleAuthButton />
+      </div>
+
       <SnippetForm addSnippet={addSnippet} />
       {isLoading ? (
         <p>Loading...</p>
