@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GoogleAuthButton from "./GoogleAuthButton";
 import SnippetForm from "./SnippetForm";
 import SnippetsComponent from "./SnippetsComponent";
@@ -75,7 +75,7 @@ const SnippetContainer = () => {
           snippet.id === snippetId ? { ...snippet, ...updatedData } : snippet
         )
       );
-      closeModal();
+      // closeModal();
     } catch (error) {
       console.error("Error updating snippet:", error);
     }
@@ -92,12 +92,27 @@ const SnippetContainer = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    if (e.key === "Enter") {
-      // No additional action needed here if you're filtering
-      // snippets directly in the render method.
+  const typingTimeoutRef = useRef(null);
+
+  const handleUpdateSnippet = (snippetId, updatedData) => {
+    setCurrentSnippet(updatedData);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      updateSnippet(snippetId, updatedData);
+    }, 2000);
   };
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const filteredSnippets = searchQuery
     ? snippets.filter((snippet) => {
@@ -119,22 +134,24 @@ const SnippetContainer = () => {
             placeholder="Search snippets..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearch}
           />
         </div>
+
         <GoogleAuthButton />
       </div>
 
       <SnippetForm addSnippet={addSnippet} />
+
       {isLoading ? (
         <p>Loading...</p>
       ) : (
-        <React.Fragment>
+        <>
           <SnippetsComponent
             snippets={filteredSnippets}
             onCardClick={openModal}
             searchQuery={searchQuery}
           />
+
           <Modal show={isModalOpen} onClose={closeModal}>
             {currentSnippet && (
               <div className="big-display-card">
@@ -142,8 +159,9 @@ const SnippetContainer = () => {
                   className="big-display-card-title"
                   type="text"
                   value={currentSnippet.title}
+                  // onChange should call handleUpdateSnippet with the snippet id and updated data
                   onChange={(e) =>
-                    setCurrentSnippet({
+                    handleUpdateSnippet(currentSnippet.id, {
                       ...currentSnippet,
                       title: e.target.value,
                     })
@@ -153,7 +171,7 @@ const SnippetContainer = () => {
                   className="big-display-card-textarea"
                   value={currentSnippet.data}
                   onChange={(e) =>
-                    setCurrentSnippet({
+                    handleUpdateSnippet(currentSnippet.id, {
                       ...currentSnippet,
                       data: e.target.value,
                     })
@@ -167,14 +185,6 @@ const SnippetContainer = () => {
                   </div>
                   <div className="big-display-card-buttons-right">
                     <button
-                      className="update-button"
-                      onClick={() =>
-                        updateSnippet(currentSnippet.id, currentSnippet)
-                      }
-                    >
-                      Update
-                    </button>
-                    <button
                       className="delete-button"
                       onClick={() => deleteSnippet(currentSnippet.id)}
                     >
@@ -185,7 +195,7 @@ const SnippetContainer = () => {
               </div>
             )}
           </Modal>
-        </React.Fragment>
+        </>
       )}
     </div>
   );

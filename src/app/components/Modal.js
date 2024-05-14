@@ -6,8 +6,9 @@ const Modal = ({ show, onClose, children }) => {
   }
 
   return (
-    <div className="modal" onClick={onClose}>
+    <div className="modal">
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="close" onClick={onClose}>&times;</div>
         {children}
       </div>
     </div>
