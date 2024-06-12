@@ -206,3 +206,11 @@ textarea {
   display: block;
   width: 100px;
 }
+
+.guest-message {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  font-weight: semibold;
+  font-size: 18px;
+}

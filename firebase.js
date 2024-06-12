@@ -5,6 +5,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore"; // If you're using Firestore
 
@@ -27,4 +28,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Export the necessary functionalities
-export { auth, db, signInWithPopup, GoogleAuthProvider, signOut };
+export {
+  auth,
+  db,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
+};

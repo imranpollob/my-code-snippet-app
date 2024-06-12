@@ -5,7 +5,8 @@ import GoogleAuthButton from "./GoogleAuthButton";
 import SnippetForm from "./SnippetForm";
 import SnippetsComponent from "./SnippetsComponent";
 import Modal from "./Modal";
-import { db } from "../../../firebase";
+import { auth, db, onAuthStateChanged } from "../../../firebase";
+
 import {
   collection,
   getDocs,
@@ -23,9 +24,19 @@ const SnippetContainer = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSnippet, setCurrentSnippet] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetchSnippets();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        fetchSnippets(user.uid);
+      } else {
+        setUser(null);
+        setSnippets([]);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
   const openModal = (snippet) => {
@@ -37,11 +48,12 @@ const SnippetContainer = () => {
     setIsModalOpen(false);
   };
 
-  const fetchSnippets = async () => {
+  const fetchSnippets = async (uid) => {
     setIsLoading(true);
     try {
       const snippetsCol = collection(db, "snippets");
-      const snapshot = await getDocs(snippetsCol);
+      const q = query(snippetsCol, where("uid", "==", uid));
+      const snapshot = await getDocs(q);
       const snippetsList = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -57,8 +69,9 @@ const SnippetContainer = () => {
     if (!newSnippet.title && !newSnippet.data) return;
     setIsLoading(true);
     try {
-      const docRef = await addDoc(collection(db, "snippets"), newSnippet);
-      const newSnippetWithId = { id: docRef.id, ...newSnippet };
+      const snippetWithUid = { ...newSnippet, uid: user.uid };
+      const docRef = await addDoc(collection(db, "snippets"), snippetWithUid);
+      const newSnippetWithId = { id: docRef.id, ...snippetWithUid };
       setSnippets([...snippets, newSnippetWithId]);
     } catch (error) {
       console.error("Error adding new snippet:", error);
@@ -140,62 +153,68 @@ const SnippetContainer = () => {
         <GoogleAuthButton />
       </div>
 
-      <SnippetForm addSnippet={addSnippet} />
-
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
+      {user ? (
         <>
-          <SnippetsComponent
-            snippets={filteredSnippets}
-            onCardClick={openModal}
-            searchQuery={searchQuery}
-          />
+          <SnippetForm addSnippet={addSnippet} />
 
-          <Modal show={isModalOpen} onClose={closeModal}>
-            {currentSnippet && (
-              <div className="big-display-card">
-                <input
-                  className="big-display-card-title"
-                  type="text"
-                  value={currentSnippet.title}
-                  // onChange should call handleUpdateSnippet with the snippet id and updated data
-                  onChange={(e) =>
-                    handleUpdateSnippet(currentSnippet.id, {
-                      ...currentSnippet,
-                      title: e.target.value,
-                    })
-                  }
-                />
-                <textarea
-                  className="big-display-card-textarea"
-                  value={currentSnippet.data}
-                  onChange={(e) =>
-                    handleUpdateSnippet(currentSnippet.id, {
-                      ...currentSnippet,
-                      data: e.target.value,
-                    })
-                  }
-                />
-                <div className="big-display-card-buttons">
-                  <div className="big-display-card-buttons-left">
-                    <button className="close-button" onClick={closeModal}>
-                      Close
-                    </button>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <SnippetsComponent
+                snippets={filteredSnippets}
+                onCardClick={openModal}
+                searchQuery={searchQuery}
+              />
+
+              <Modal show={isModalOpen} onClose={closeModal}>
+                {currentSnippet && (
+                  <div className="big-display-card">
+                    <input
+                      className="big-display-card-title"
+                      type="text"
+                      value={currentSnippet.title}
+                      // onChange should call handleUpdateSnippet with the snippet id and updated data
+                      onChange={(e) =>
+                        handleUpdateSnippet(currentSnippet.id, {
+                          ...currentSnippet,
+                          title: e.target.value,
+                        })
+                      }
+                    />
+                    <textarea
+                      className="big-display-card-textarea"
+                      value={currentSnippet.data}
+                      onChange={(e) =>
+                        handleUpdateSnippet(currentSnippet.id, {
+                          ...currentSnippet,
+                          data: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="big-display-card-buttons">
+                      <div className="big-display-card-buttons-left">
+                        <button className="close-button" onClick={closeModal}>
+                          Close
+                        </button>
+                      </div>
+                      <div className="big-display-card-buttons-right">
+                        <button
+                          className="delete-button"
+                          onClick={() => deleteSnippet(currentSnippet.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="big-display-card-buttons-right">
-                    <button
-                      className="delete-button"
-                      onClick={() => deleteSnippet(currentSnippet.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Modal>
+                )}
+              </Modal>
+            </>
+          )}
         </>
+      ) : (
+        <p className="guest-message">Please log in to manage snippets.</p>
       )}
     </div>
   );
