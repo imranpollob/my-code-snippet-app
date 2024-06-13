@@ -235,3 +235,9 @@ textarea {
   font-weight: semibold;
   font-size: 18px;
 }
+
+.delete-button {
+  background-color: #fd5c63;
+  color: white;
+  border: 1px solid #fd5c63;
+}

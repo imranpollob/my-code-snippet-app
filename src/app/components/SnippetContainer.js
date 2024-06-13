@@ -194,16 +194,16 @@ const SnippetContainer = () => {
                     />
                     <div className="big-display-card-buttons">
                       <div className="big-display-card-buttons-left">
-                        <button className="close-button" onClick={closeModal}>
-                          Close
-                        </button>
-                      </div>
-                      <div className="big-display-card-buttons-right">
                         <button
                           className="delete-button"
                           onClick={() => deleteSnippet(currentSnippet.id)}
                         >
                           Delete
+                        </button>
+                      </div>
+                      <div className="big-display-card-buttons-right">
+                        <button className="close-button" onClick={closeModal}>
+                          Close
                         </button>
                       </div>
                     </div>
